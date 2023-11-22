@@ -69,4 +69,55 @@ route.post('/login', async(req, res) => {
     }
 })
 
+route.patch('/user-details/:id', async (req, res) => {
+    const id = req.params.id;
+
+    const personalDetails = {
+        firstName,
+        dob,
+        gender,
+        guardianContact} = req.body  
+
+    const addressDetails = {
+        address,
+        city,
+        state,
+        pincode,
+        referral} = req.body   
+    
+    const academicDetails = {
+        school,
+        standard,
+        board,
+        subjects} = req.body
+
+    try {
+        let updateResult;
+
+        if (personalDetails) {
+            const updatePersonal = await userSchema.findByIdAndUpdate(id, { $set: { personalDetails } }, { new: true });
+            updateResult = {...updateResult, ...updatePersonal}
+        }
+        if (addressDetails) {
+            const updateAddress = await userSchema.findByIdAndUpdate(id, { $set: { addressDetails } }, { new: true });
+            updateResult = {...updateResult, ...updateAddress}
+        } 
+        if (academicDetails) {
+            const updateAcademic = await userSchema.findByIdAndUpdate(id, { $set: { academicDetails } }, { new: true });
+            updateResult = {...updateResult, ...updateAcademic}
+        } else {
+            return res.status(400).json({ msg: 'Invalid request. No valid details provided.' });
+        }
+
+        if (updateResult) {
+            res.status(200).json({ msg: 'User details updated successfully', updatedUser: updateResult });
+        } else {
+            res.status(404).json({ msg: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ msg: 'Internal server error', error: error.message });
+    }
+});
+
+
 module.exports = route
